@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5" xmlns:th="http://www.thymeleaf.org" lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ADMINISTRATOR</title>
+</head>
+<body>
+
+<div sec:authorize="hasRole('ADMIN')">
+    <div th:each="User : ${users}">
+        <a th:href="@{/user/{id}(id=${User.getId()})}" th:text="${User.getUsername()}">user</a>
+        <a th:text="${User.getLastName()}"/>
+        <a th:text="${User.getEmail()}"/>
+    </div>
+        <br/>
+    </div>
+    <div sec:authorize="hasRole('ADMIN')">
+        <a  href="/new">Create new user</a>
+    </div>
+<br/>
+<form th:action="@{/user}" th:object="${users}" method="get">
+    <input type="submit" value="User" />
+</form>
+    <br/>
+    <form th:action="@{/logout}" method="post">
+        <input type="submit" value="Logout" />
+    </form>
+    <br/>
+    <hr/>
+</body>
+</html></html>
