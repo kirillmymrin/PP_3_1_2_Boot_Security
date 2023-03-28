@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import ru.kata.spring.boot_security.demo.entities.SecurityUser;
 import ru.kata.spring.boot_security.demo.entities.User;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
 
@@ -21,6 +20,6 @@ public class SecurityUserService implements UserDetailsService {
             throw new UsernameNotFoundException("Could not find user");
         }
 
-        return new SecurityUser(user);
+        return  user;
     }
 }

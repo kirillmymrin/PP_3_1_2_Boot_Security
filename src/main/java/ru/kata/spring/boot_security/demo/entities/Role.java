@@ -16,7 +16,6 @@ public class Role {
 //    @ManyToMany(mappedBy = "roles")
 //
 
-
     public Role() {
     }
 
