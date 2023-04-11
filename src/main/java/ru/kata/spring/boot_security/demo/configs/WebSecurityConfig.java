@@ -9,7 +9,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import ru.kata.spring.boot_security.demo.service.SecurityUserService;
+import ru.kata.spring.boot_security.demo.service.UserService;
 
 
 //import org.springframework.beans.factory.annotation.Autowired;
@@ -106,7 +106,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return new SecurityUserService();
+        return new UserService();
     }
 
     @Bean
@@ -136,19 +136,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
+            .antMatchers("/admin").hasAnyRole("ADMIN", "USER")
+            .antMatchers("/new").hasRole("ADMIN")
 
-                .antMatchers("/admin").hasRole("ADMIN")
+            .antMatchers("/user").hasAnyRole("USER", "ADMIN")
 
-                .antMatchers("/user").hasAnyRole("USER","ADMIN")
+            .anyRequest().authenticated()
 
-//                .antMatchers("/").permitAll()
-                .anyRequest().authenticated()
-
-                .and()
-                .formLogin().successHandler(successUserHandler())
-                .permitAll()
-                .and()
-                .logout()
-                .permitAll();
+            .and()
+            .formLogin().successHandler(successUserHandler())
+            .permitAll()
+            .and()
+            .exceptionHandling()
+            .and()
+            .logout()
+            .permitAll();
     }
 }
