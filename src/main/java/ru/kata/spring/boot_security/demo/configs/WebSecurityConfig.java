@@ -11,95 +11,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
-
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.context.annotation.Lazy;
-//import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-//import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-//import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-//import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-//import org.springframework.security.core.userdetails.User;
-//import org.springframework.security.core.userdetails.UserDetails;
-//import org.springframework.security.core.userdetails.UserDetailsService;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-//import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-//import org.springframework.security.provisioning.JdbcUserDetailsManager;
-//import ru.kata.spring.boot_security.demo.service.UserService;
-//
-//import javax.sql.DataSource;
-//
-//@Configuration
-//@EnableWebSecurity
-//public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-//    @Bean
-//    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
-//
-//    @Autowired
-//    UserService userService;
-//
-//    @Autowired
-//    private final SuccessUserHandler successUserHandler;
-//
-//    public WebSecurityConfig(SuccessUserHandler successUserHandler) {
-//        this.successUserHandler = successUserHandler;
-//    }
-//
-//    @Override
-//    protected void configure(HttpSecurity http) throws Exception {
-//        http
-//                .csrf()
-//
-//                .disable()
-//
-//                .authorizeRequests()
-//
-//                .antMatchers("/admin/*").hasAnyRole("ADMIN")
-//
-//                .antMatchers("/user").hasRole("USER")
-//
-//                .antMatchers("/").permitAll()
-//                .anyRequest().authenticated()
-//
-//                .and()
-//                .formLogin().successHandler(successUserHandler)
-//                .permitAll()
-//                .and()
-//                .logout()
-//                .permitAll();
-//    }
-//
-//    // аутентификация inMemory
-////    @Bean
-////    @Override
-////    public UserDetailsService userDetailsService() {
-////        UserDetails user =
-////                User.withDefaultPasswordEncoder()
-////                        .username("user")
-////                        .password("user")
-////                        .roles("USER")
-////                        .build();
-////        UserDetails admin =
-////                User.withDefaultPasswordEncoder()
-////                        .username("admin")
-////                        .password("admin")
-////                        .roles("ADMIN")
-////                        .build();
-////        return new InMemoryUserDetailsManager(user,admin);
-////    }
-//    @Bean
-//    public JdbcUserDetailsManager users(DataSource dataSource) {
-//        return new JdbcUserDetailsManager(dataSource);
-//    }
-//
-//    @Autowired
-//    protected void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.userDetailsService(userService).passwordEncoder(bCryptPasswordEncoder());
-//    }
-//}
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -110,7 +21,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
+    public BCryptPasswordEncoder BCryptpasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -118,7 +29,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService());
-        authProvider.setPasswordEncoder(passwordEncoder());
+        authProvider.setPasswordEncoder(BCryptpasswordEncoder());
 
         return authProvider;
     }
@@ -129,27 +40,29 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    protected void configure(AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(authenticationProvider());
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-            .antMatchers("/admin").hasAnyRole("ADMIN", "USER")
-            .antMatchers("/new").hasRole("ADMIN")
+                .antMatchers("/admin").hasAnyRole("ADMIN", "USER")
 
-            .antMatchers("/user").hasAnyRole("USER", "ADMIN")
+                .antMatchers("/new").hasRole("ADMIN")
 
-            .anyRequest().authenticated()
+                .antMatchers("/user").hasAnyRole("USER", "ADMIN")
 
-            .and()
-            .formLogin().successHandler(successUserHandler())
-            .permitAll()
-            .and()
-            .exceptionHandling()
-            .and()
-            .logout()
-            .permitAll();
+                .anyRequest().authenticated()
+
+                .and()
+                .formLogin().successHandler(successUserHandler())
+                .permitAll()
+                .and()
+                .exceptionHandling()
+                .and()
+                .logout()
+                .permitAll();
     }
+
 }

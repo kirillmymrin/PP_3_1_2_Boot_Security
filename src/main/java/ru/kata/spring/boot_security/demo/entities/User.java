@@ -30,7 +30,7 @@ public class User implements UserDetails {
 
     private int age;
 
-    @ManyToMany( fetch = FetchType.LAZY)// cascade = CascadeType.ALL, fetch = FetchType.LAZY
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -105,7 +105,7 @@ public class User implements UserDetails {
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
 
         for (Role role : roles) {
-         authorities.add(new SimpleGrantedAuthority(role.getName()));
+            authorities.add(new SimpleGrantedAuthority(role.getName()));
 
         }
         return authorities;

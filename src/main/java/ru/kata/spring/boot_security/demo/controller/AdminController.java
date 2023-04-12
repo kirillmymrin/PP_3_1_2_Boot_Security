@@ -1,6 +1,5 @@
 package ru.kata.spring.boot_security.demo.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -9,25 +8,23 @@ import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.entities.Role;
 import ru.kata.spring.boot_security.demo.entities.User;
 import ru.kata.spring.boot_security.demo.service.UserService;
+
 import java.security.Principal;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Logger;
 
 @Controller
 public class AdminController {
 
-    @Autowired
-    private final UserService userService;
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
-
-    private Logger logger = Logger.getLogger("AdminController");
+    final
+    UserService userService;
+    final
+    BCryptPasswordEncoder bCryptPasswordEncoder;
 
 
-    public AdminController(UserService userService) {
+    public AdminController(UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userService = userService;
-
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     @GetMapping(value = "/admin")
@@ -51,54 +48,53 @@ public class AdminController {
                        @RequestParam("email") String email,
                        @RequestParam("password") String password,
                        @RequestParam("roles") String role) {
-        logger.info("Before create");
-        User userInfoUpdate = new User();
-        userInfoUpdate.setUsername(name);
-        logger.info("After name");
-        userInfoUpdate.setLastName(surname);
-        logger.info("After lastname");
-        userInfoUpdate.setAge(age);
-        logger.info("After age");
-        userInfoUpdate.setEmail(email);
-        logger.info("After email");
-        userInfoUpdate.setPassword(bCryptPasswordEncoder.encode(password));
-        logger.info("After pass");
+
+        User userInfoSave = new User();
+        userInfoSave.setUsername(name);
+        userInfoSave.setLastName(surname);
+        userInfoSave.setAge(age);
+        userInfoSave.setEmail(email);
+        userInfoSave.setPassword(bCryptPasswordEncoder.encode(password));
         Set<Role> roles = new HashSet<>();
         Role nRole;
         if (role.equals("ROLE_ADMIN")) {
-            nRole = new Role(2l, "ROLE_ADMIN");
+            nRole = new Role(2L, "ROLE_ADMIN");
         } else {
-            nRole = new Role(1l, "ROLE_USER");
+            nRole = new Role(1L, "ROLE_USER");
         }
         roles.add(nRole);
-        userInfoUpdate.setRoles(roles);
-        logger.info("After role");
-        userService.save(userInfoUpdate);
+        userInfoSave.setRoles(roles);
+        userService.save(userInfoSave);
         return "redirect:/admin";
     }
 
 
     @PostMapping("/admin/{id}")
     public String update(
-            @RequestParam("idToUpdate") Integer id,
             @RequestParam("username") String name,
             @RequestParam("lastName") String surname,
             @RequestParam("age") Integer age,
             @RequestParam("email") String email,
             @RequestParam("password") String password,
-            @RequestParam("roles") String role) {
+            @RequestParam("roles") String role, @PathVariable String id) {
+
         User userInfoUpdate = new User();
         userInfoUpdate.setUsername(name);
         userInfoUpdate.setLastName(surname);
         userInfoUpdate.setAge(age);
         userInfoUpdate.setEmail(email);
-        userInfoUpdate.setPassword(bCryptPasswordEncoder.encode(password));
+        String emptyLine = "";
+        if (password.equals(emptyLine)) {
+            userInfoUpdate.setPassword(userService.loadUserByUsername(userInfoUpdate.getUsername()).getPassword());
+        } else {
+            userInfoUpdate.setPassword(bCryptPasswordEncoder.encode(password));
+        }
         Set<Role> roles = new HashSet<>();
         Role nRole;
         if (role.equals("ROLE_ADMIN")) {
-            nRole = new Role(2l, "ROLE_ADMIN");
+            nRole = new Role(2L, "ROLE_ADMIN");
         } else {
-            nRole = new Role(1l, "ROLE_USER");
+            nRole = new Role(1L, "ROLE_USER");
         }
         roles.add(nRole);
         userInfoUpdate.setRoles(roles);

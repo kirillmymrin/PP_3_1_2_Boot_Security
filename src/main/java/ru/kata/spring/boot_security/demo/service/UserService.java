@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.entities.User;
@@ -28,12 +27,15 @@ public class UserService implements UserDetailsService {
     @Autowired
     RoleRepository roleRepository;
 
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
-
 
     @PersistenceContext
     private EntityManager entityManager;
+
+
+
+    public UserService() {
+
+    }
 
 
     public List<User> allUsers() {
@@ -46,6 +48,7 @@ public class UserService implements UserDetailsService {
     public void save(User user) {
         entityManager.persist(user);
     }
+
     @Transactional
     public User getUser(long id) {
         return entityManager.find(User.class, id);
@@ -57,7 +60,7 @@ public class UserService implements UserDetailsService {
         userToUpd.setUsername(updateUser.getUsername());
         userToUpd.setLastName(updateUser.getLastName());
         userToUpd.setEmail(updateUser.getEmail());
-        userToUpd.setAge(userToUpd.getAge());
+        userToUpd.setAge(updateUser.getAge());
         userToUpd.setPassword(updateUser.getPassword());
         userToUpd.setRoles(updateUser.getRoles());
         entityManager.persist(userToUpd);
