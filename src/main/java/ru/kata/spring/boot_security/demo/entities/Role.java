@@ -1,6 +1,4 @@
 package ru.kata.spring.boot_security.demo.entities;
-
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
