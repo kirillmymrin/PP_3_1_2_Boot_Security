@@ -1,13 +1,14 @@
 package ru.kata.spring.boot_security.demo.service;
 
 import org.hibernate.Hibernate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.entities.User;
-import ru.kata.spring.boot_security.demo.repository.RoleRepository;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
@@ -16,39 +17,45 @@ import java.util.Optional;
 @Service
 public class UserServiceImpl implements UserDetailsService, UserService {
 
-    final
-    UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    final
-    RoleRepository roleRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
-
+    @Autowired
+    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
 
+    @Override
     public List<User> allUsers() {
         return userRepository.findAll();
     }
 
+    @Override
     @Transactional
     public void save(User user) {
         user.setPassword(user.getPassword());
         userRepository.save(user);
     }
 
+    @Override
     @Transactional
     public User getUser(long id) {
         Optional<User> optionalUser = userRepository.findById(id);
-        if (!optionalUser.isPresent()) {
+        if (optionalUser.isEmpty()) {
             throw new UsernameNotFoundException("Sorry, there is no user with this id.");
         }
         return optionalUser.get();
     }
 
+    @Override
+    public String encodePassword(String password) {
+        return bCryptPasswordEncoder.encode(password);
+    }
+
+    @Override
     @Transactional
     public void update(Long id, User updateUser) {
         User userToUpd = getUser(id);
@@ -60,6 +67,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         userToUpd.setRoles(updateUser.getRoles());
     }
 
+    @Override
     @Transactional
     public void delete(Long id) {
         userRepository.deleteById(id);

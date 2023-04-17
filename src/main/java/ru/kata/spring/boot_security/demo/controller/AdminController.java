@@ -1,5 +1,5 @@
 package ru.kata.spring.boot_security.demo.controller;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -15,14 +15,10 @@ import java.util.Set;
 @Controller
 public class AdminController {
 
-    final
-    UserServiceImpl userServiceImpl;
-    final
-    BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final UserServiceImpl userServiceImpl;
 
-
-    public AdminController(BCryptPasswordEncoder bCryptPasswordEncoder, UserServiceImpl userServiceImpl) {
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+    @Autowired
+    public AdminController(UserServiceImpl userServiceImpl) {
         this.userServiceImpl = userServiceImpl;
     }
 
@@ -47,23 +43,9 @@ public class AdminController {
                        @RequestParam("email") String email,
                        @RequestParam("password") String password,
                        @RequestParam("roles") String role) {
-
-        User userInfoSave = new User();
-        userInfoSave.setUsername(name);
-        userInfoSave.setLastName(surname);
-        userInfoSave.setAge(age);
-        userInfoSave.setEmail(email);
-        userInfoSave.setPassword(bCryptPasswordEncoder.encode(password));
-        Set<Role> roles = new HashSet<>();
-        Role nRole;
-        if (role.equals("ROLE_ADMIN")) {
-            nRole = new Role(2L, "ROLE_ADMIN");
-        } else {
-            nRole = new Role(1L, "ROLE_USER");
-        }
-        roles.add(nRole);
-        userInfoSave.setRoles(roles);
-        userServiceImpl.save(userInfoSave);
+        String userPassword = userServiceImpl.encodePassword(password);
+        User user = getUserWithFields(name, surname, age, email, userPassword, role);
+        userServiceImpl.save(user);
         return "redirect:/admin";
     }
 
@@ -78,17 +60,30 @@ public class AdminController {
             @RequestParam("roles") String role,
             @PathVariable String id) {
 
+        String userPassword;
+        if (password.isEmpty()) {
+            userPassword = userServiceImpl.loadUserByUsername(name).getPassword();
+        } else {
+            userPassword = userServiceImpl.encodePassword(password);
+        }
+        User user = getUserWithFields(name, surname, age, email, userPassword, role);
+        userServiceImpl.update(Long.valueOf(id), user);
+        return "redirect:/admin";
+    }
+
+    @PostMapping("/{id}")
+    public String delete(@ModelAttribute("user") User user, @PathVariable("id") long id) {
+        userServiceImpl.delete(id);
+        return "redirect:/admin";
+    }
+
+    private User getUserWithFields(String name, String surname, Integer age, String email, String password, String role) {
         User userInfoUpdate = new User();
         userInfoUpdate.setUsername(name);
         userInfoUpdate.setLastName(surname);
         userInfoUpdate.setAge(age);
         userInfoUpdate.setEmail(email);
-        String emptyLine = "";
-        if (password.equals(emptyLine)) {
-            userInfoUpdate.setPassword(userServiceImpl.loadUserByUsername(userInfoUpdate.getUsername()).getPassword());
-        } else {
-            userInfoUpdate.setPassword(bCryptPasswordEncoder.encode(password));
-        }
+        userInfoUpdate.setPassword(password);
         Set<Role> roles = new HashSet<>();
         Role nRole;
         if (role.equals("ROLE_ADMIN")) {
@@ -98,14 +93,7 @@ public class AdminController {
         }
         roles.add(nRole);
         userInfoUpdate.setRoles(roles);
-        userServiceImpl.update(Long.valueOf(id), userInfoUpdate);
-        return "redirect:/admin";
-    }
-
-    @PostMapping("/{id}")
-    public String delete(@ModelAttribute("user") User user, @PathVariable("id") long id) {
-        userServiceImpl.delete(id);
-        return "redirect:/admin";
+        return userInfoUpdate;
     }
 }
 
