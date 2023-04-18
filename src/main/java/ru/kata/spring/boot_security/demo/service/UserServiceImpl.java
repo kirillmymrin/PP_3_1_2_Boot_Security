@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         userToUpd.setEmail(updateUser.getEmail());
         userToUpd.setAge(updateUser.getAge());
         if (updateUser.getPassword().isEmpty()){
-            userToUpd.setPassword(loadUserByUsername(updateUser.getUsername()).getPassword());
+            userToUpd.setPassword(userToUpd.getPassword());
         }else {
             userToUpd.setPassword(bCryptPasswordEncoder.encode(updateUser.getPassword()));
         }
