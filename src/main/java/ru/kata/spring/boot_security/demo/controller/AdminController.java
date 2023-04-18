@@ -1,16 +1,13 @@
 package ru.kata.spring.boot_security.demo.controller;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
-import ru.kata.spring.boot_security.demo.entities.Role;
 import ru.kata.spring.boot_security.demo.entities.User;
 import ru.kata.spring.boot_security.demo.service.UserServiceImpl;
-
 import java.security.Principal;
-import java.util.HashSet;
-import java.util.Set;
 
 @Controller
 public class AdminController {
@@ -43,8 +40,8 @@ public class AdminController {
                        @RequestParam("email") String email,
                        @RequestParam("password") String password,
                        @RequestParam("roles") String role) {
-        String userPassword = userServiceImpl.encodePassword(password);
-        User user = getUserWithFields(name, surname, age, email, userPassword, role);
+
+        User user =  userServiceImpl.getUserWithFields(name, surname, age, email, password, role);
         userServiceImpl.save(user);
         return "redirect:/admin";
     }
@@ -59,14 +56,7 @@ public class AdminController {
             @RequestParam("password") String password,
             @RequestParam("roles") String role,
             @PathVariable String id) {
-
-        String userPassword;
-        if (password.isEmpty()) {
-            userPassword = userServiceImpl.loadUserByUsername(name).getPassword();
-        } else {
-            userPassword = userServiceImpl.encodePassword(password);
-        }
-        User user = getUserWithFields(name, surname, age, email, userPassword, role);
+        User user = userServiceImpl.getUserWithFields(name, surname, age, email, password, role);
         userServiceImpl.update(Long.valueOf(id), user);
         return "redirect:/admin";
     }
@@ -77,24 +67,7 @@ public class AdminController {
         return "redirect:/admin";
     }
 
-    private User getUserWithFields(String name, String surname, Integer age, String email, String password, String role) {
-        User userInfoUpdate = new User();
-        userInfoUpdate.setUsername(name);
-        userInfoUpdate.setLastName(surname);
-        userInfoUpdate.setAge(age);
-        userInfoUpdate.setEmail(email);
-        userInfoUpdate.setPassword(password);
-        Set<Role> roles = new HashSet<>();
-        Role nRole;
-        if (role.equals("ROLE_ADMIN")) {
-            nRole = new Role(2L, "ROLE_ADMIN");
-        } else {
-            nRole = new Role(1L, "ROLE_USER");
-        }
-        roles.add(nRole);
-        userInfoUpdate.setRoles(roles);
-        return userInfoUpdate;
-    }
+
 }
 
 

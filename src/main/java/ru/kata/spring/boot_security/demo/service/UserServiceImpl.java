@@ -8,10 +8,14 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.kata.spring.boot_security.demo.entities.Role;
 import ru.kata.spring.boot_security.demo.entities.User;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
+
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 
 @Service
@@ -36,7 +40,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     @Override
     @Transactional
     public void save(User user) {
-        user.setPassword(user.getPassword());
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
 
@@ -63,7 +67,11 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         userToUpd.setLastName(updateUser.getLastName());
         userToUpd.setEmail(updateUser.getEmail());
         userToUpd.setAge(updateUser.getAge());
-        userToUpd.setPassword(updateUser.getPassword());
+        if (updateUser.getPassword().isEmpty()){
+            userToUpd.setPassword(loadUserByUsername(updateUser.getUsername()).getPassword());
+        }else {
+            userToUpd.setPassword(bCryptPasswordEncoder.encode(updateUser.getPassword()));
+        }
         userToUpd.setRoles(updateUser.getRoles());
     }
 
@@ -81,5 +89,24 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         Hibernate.initialize(user.getRoles());
 
         return user;
+    }
+    @Override
+    public User getUserWithFields(String name, String surname, Integer age, String email, String password, String role) {
+        User userInfoUpdate = new User();
+        userInfoUpdate.setUsername(name);
+        userInfoUpdate.setLastName(surname);
+        userInfoUpdate.setAge(age);
+        userInfoUpdate.setEmail(email);
+        userInfoUpdate.setPassword(password);
+        Set<Role> roles = new HashSet<>();
+        Role nRole;
+        if (role.equals("ROLE_ADMIN")) {
+            nRole = new Role(2L, "ROLE_ADMIN");
+        } else {
+            nRole = new Role(1L, "ROLE_USER");
+        }
+        roles.add(nRole);
+        userInfoUpdate.setRoles(roles);
+        return userInfoUpdate;
     }
 }

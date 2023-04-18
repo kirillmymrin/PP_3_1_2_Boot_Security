@@ -20,5 +20,5 @@ public interface UserService {
 
     String encodePassword(String password);
 
-
+    User getUserWithFields(String name, String surname, Integer age, String email, String password, String role);
 }
