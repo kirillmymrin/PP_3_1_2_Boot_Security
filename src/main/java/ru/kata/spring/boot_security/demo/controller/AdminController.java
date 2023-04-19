@@ -6,6 +6,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.entities.Role;
 import ru.kata.spring.boot_security.demo.entities.User;
+import ru.kata.spring.boot_security.demo.service.UserService;
 import ru.kata.spring.boot_security.demo.service.UserServiceImpl;
 
 import java.security.Principal;
@@ -15,24 +16,24 @@ import java.util.Set;
 @Controller
 public class AdminController {
 
-    private final UserServiceImpl userServiceImpl;
+    private final UserService userService;
 
     @Autowired
     public AdminController(UserServiceImpl userServiceImpl) {
-        this.userServiceImpl = userServiceImpl;
+        this.userService = userServiceImpl;
     }
 
     @GetMapping(value = "/admin")
     public String getUsers(ModelMap modelMap, Principal principal) {
-        modelMap.addAttribute("users", userServiceImpl.allUsers());
-        modelMap.addAttribute("us", userServiceImpl.loadUserByUsername(principal.getName()));
+        modelMap.addAttribute("users", userService.allUsers());
+        modelMap.addAttribute("us", userService.loadUserByUsername(principal.getName()));
         return "admin";
     }
 
     @GetMapping("/new")
     public String getNewFrom(Model model, Principal principal) {
         model.addAttribute("user", new User());
-        model.addAttribute("us", userServiceImpl.loadUserByUsername(principal.getName()));
+        model.addAttribute("us", userService.loadUserByUsername(principal.getName()));
         return "newUser";
     }
 
@@ -43,9 +44,9 @@ public class AdminController {
                        @RequestParam("email") String email,
                        @RequestParam("password") String password,
                        @RequestParam("roles") String role) {
-        String userPassword = userServiceImpl.encodePassword(password);
+        String userPassword = userService.encodePassword(password);
         User user = getUserWithFields(name, surname, age, email, userPassword, role);
-        userServiceImpl.save(user);
+        userService.save(user);
         return "redirect:/admin";
     }
 
@@ -62,18 +63,18 @@ public class AdminController {
 
         String userPassword;
         if (password.isEmpty()) {
-            userPassword = userServiceImpl.loadUserByUsername(name).getPassword();
+            userPassword = userService.loadUserByUsername(name).getPassword();
         } else {
-            userPassword = userServiceImpl.encodePassword(password);
+            userPassword = userService.encodePassword(password);
         }
         User user = getUserWithFields(name, surname, age, email, userPassword, role);
-        userServiceImpl.update(Long.valueOf(id), user);
+        userService.update(Long.valueOf(id), user);
         return "redirect:/admin";
     }
 
     @PostMapping("/{id}")
     public String delete(@ModelAttribute("user") User user, @PathVariable("id") long id) {
-        userServiceImpl.delete(id);
+        userService.delete(id);
         return "redirect:/admin";
     }
 

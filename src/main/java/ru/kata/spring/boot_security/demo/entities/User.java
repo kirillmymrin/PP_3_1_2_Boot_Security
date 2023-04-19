@@ -7,7 +7,6 @@ import javax.persistence.*;
 import java.util.*;
 
 @Entity
-
 @Table(name = "user")
 
 public class User implements UserDetails {
@@ -134,4 +133,16 @@ public class User implements UserDetails {
     }
 
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", password='" + password + '\'' +
+                ", email='" + email + '\'' +
+                ", age=" + age +
+                ", roles=" + roles +
+                '}';
+    }
 }

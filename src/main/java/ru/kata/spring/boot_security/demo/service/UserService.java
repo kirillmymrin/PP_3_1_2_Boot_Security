@@ -20,5 +20,7 @@ public interface UserService {
 
     String encodePassword(String password);
 
+    User getUser(String name);
+
 
 }

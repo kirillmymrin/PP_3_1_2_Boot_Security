@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     @Override
     @Transactional
     public void save(User user) {
-        user.setPassword(user.getPassword());
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
 
@@ -48,6 +48,14 @@ public class UserServiceImpl implements UserDetailsService, UserService {
             throw new UsernameNotFoundException("Sorry, there is no user with this id.");
         }
         return optionalUser.get();
+    }
+    @Override
+    public User getUser(String name){
+        User user = userRepository.findByUsername(name);
+        if (user == null){
+            throw new UsernameNotFoundException("Sorry, there is no user with this name.");
+        }
+        return user;
     }
 
     @Override
