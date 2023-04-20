@@ -1,17 +1,12 @@
 package ru.kata.spring.boot_security.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.kata.spring.boot_security.demo.entities.Role;
 import ru.kata.spring.boot_security.demo.entities.User;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
-import java.security.Principal;
-import java.util.HashSet;
 import java.util.List;
-import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/api")
@@ -24,68 +19,37 @@ public class ApiController {
         this.userService = userService;
     }
 
-    private final Logger logger = Logger.getLogger("ApiController");
-
-
-    @GetMapping(value = "/currentUser")
-    @ResponseBody
-    public ResponseEntity<User> getAuthorizeUser(Principal principal) {
-        return new ResponseEntity<>(userService.getUser(principal.getName()), HttpStatus.OK);
-    }
-
     @GetMapping("/users")
-    public List<User> getUsers() {
-        return userService.allUsers();
+    @ResponseBody
+    public ResponseEntity<List<User>> getUsers() {
+        return  ResponseEntity.ok(userService.allUsers());
     }
 
-    @GetMapping("/users/{id}")
-    public User getUser(@PathVariable("id")Long id){
-        return userService.getUser(id);
+    @GetMapping("/admin/users/{id}")
+    public ResponseEntity<User> getUser(@PathVariable("id")Long id){
+        return ResponseEntity.ok(userService.getUser(id));
     }
 
-    @PatchMapping("/users")
+    @PatchMapping("/admin/users")
     public ResponseEntity<User> patchUser(@RequestBody User user, @RequestParam(required = false
             , name = "selectedRoles") String[] selectedRoles) {
-        String userPassword;
-        logger.info(user.toString());
-        if (user.getPassword().isEmpty()) {
-            userPassword = userService.getUser(user.getId()).getPassword();
-        } else {
-            userPassword = userService.encodePassword(user.getPassword());
-        }
-        user.setPassword(userPassword);
-        HashSet<Role> editRoles = new HashSet<>();
-        for (String roleName : selectedRoles) {
-            if (roleName.equals("ADMIN")) {
-                editRoles.add(new Role(2L, "ROLE_ADMIN"));
-            } else {
-                editRoles.add(new Role(1L, "ROLE_USER"));
-            }
-        }
-        user.setRoles(editRoles);
+        user.setRoles(userService.saveRole(selectedRoles));
         userService.update(user.getId(),user);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+        return ResponseEntity.ok(user);
     }
 
-    @PostMapping("/users")
+    @PostMapping("/admin/users")
     public ResponseEntity<User> addUser(@RequestBody User user, @RequestParam(required = false
             , name = "selectedRoles") String[] selectedRoles) {
-        HashSet<Role> saveUserRoles = new HashSet<>();
-        for (String roleName : selectedRoles) {
-            if (roleName.equals("ADMIN")) {
-                saveUserRoles.add(new Role(2L, "ROLE_ADMIN"));
-            } else {
-                saveUserRoles.add(new Role(1L, "ROLE_USER"));
-            }
-        }
-        user.setRoles(saveUserRoles);
+        user.setRoles(userService.saveRole(selectedRoles));
         userService.save(user);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+        return ResponseEntity.ok(user);
     }
 
-    @DeleteMapping ("/users/{deleteId}")
-    public void delete(@PathVariable(required = true, name = "deleteId") Long id) {
+    @DeleteMapping ("/admin/users/{deleteId}")
+    public ResponseEntity<Void> delete(@PathVariable(required = true, name = "deleteId") Long id) {
         userService.delete(id);
+        return ResponseEntity.ok().build();
     }
 
 }

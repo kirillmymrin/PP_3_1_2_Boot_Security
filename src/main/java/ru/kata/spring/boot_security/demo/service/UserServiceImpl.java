@@ -8,8 +8,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.kata.spring.boot_security.demo.entities.Role;
 import ru.kata.spring.boot_security.demo.entities.User;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
+
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,18 +52,14 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         }
         return optionalUser.get();
     }
+
     @Override
-    public User getUser(String name){
+    public User getUser(String name) {
         User user = userRepository.findByUsername(name);
-        if (user == null){
+        if (user == null) {
             throw new UsernameNotFoundException("Sorry, there is no user with this name.");
         }
         return user;
-    }
-
-    @Override
-    public String encodePassword(String password) {
-        return bCryptPasswordEncoder.encode(password);
     }
 
     @Override
@@ -71,7 +70,11 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         userToUpd.setLastName(updateUser.getLastName());
         userToUpd.setEmail(updateUser.getEmail());
         userToUpd.setAge(updateUser.getAge());
-        userToUpd.setPassword(updateUser.getPassword());
+        if (updateUser.getPassword().isEmpty()) {
+            userToUpd.setPassword(userToUpd.getPassword());
+        } else {
+            userToUpd.setPassword(bCryptPasswordEncoder.encode(updateUser.getPassword()));
+        }
         userToUpd.setRoles(updateUser.getRoles());
     }
 
@@ -89,5 +92,18 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         Hibernate.initialize(user.getRoles());
 
         return user;
+    }
+
+    @Override
+    public HashSet<Role> saveRole(String[] selectedRoles) {
+        HashSet<Role> editRoles = new HashSet<>();
+        for (String roleName : selectedRoles) {
+            if (roleName.equals("ADMIN")) {
+                editRoles.add(new Role(2L, "ROLE_ADMIN"));
+            } else {
+                editRoles.add(new Role(1L, "ROLE_USER"));
+            }
+        }
+        return editRoles;
     }
 }

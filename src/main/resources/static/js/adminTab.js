@@ -8,11 +8,11 @@ const userFetchService = {
     },
 
     findAllUsers: async () => await fetch('api/users'),
-    addNewUser: async (user, addRoles) => await fetch(`api/users/?selectedRoles=` + addRoles,
+    addNewUser: async (user, addRoles) => await fetch(`api/admin/users/?selectedRoles=` + addRoles,
         {method: 'POST', headers: userFetchService.head, body: JSON.stringify(user)}),
-    updateUser: async (user, editRoles) => await fetch(`api/users/?selectedRoles=` + editRoles,
+    updateUser: async (user, editRoles) => await fetch(`api/admin/users/?selectedRoles=` + editRoles,
         {method: 'PATCH', headers: userFetchService.head, body: JSON.stringify(user)}),
-    deleteUser: async (deleteId) => await fetch(`/api/users/${deleteId}`,
+    deleteUser: async (deleteId) => await fetch(`/api/admin/users/${deleteId}`,
         {method: 'DELETE', headers: userFetchService.head})
 }
 
@@ -22,7 +22,9 @@ async function getTableWithUsers() {
 
     await userFetchService.findAllUsers()
         .then(res => res.json())
+
         .then(users => {
+            console.log(users.length)
             users.forEach(user => {
                 let tableFilling = `$(
                          <tr>
@@ -32,8 +34,8 @@ async function getTableWithUsers() {
                             <td>${user.age}</td>
                             <td>${user.email}</td>
                             <td>${getRoles(user)}</td>
-                            <td> <a href="/api/users/${user.id}" class="btn btn-primary editBtn" >Edit</a> </td>
-                            <td> <a href="/api/users/${user.id}" class="btn btn-danger deleteBtn ">Delete</a> </td> 
+                            <td> <a href="/api/admin/users/${user.id}" class="btn btn-primary editBtn" >Edit</a> </td>
+                            <td> <a href="/api/admin/users/${user.id}" class="btn btn-danger deleteBtn ">Delete</a> </td> 
                             </td>
                             <td>
                             </td>

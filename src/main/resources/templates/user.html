@@ -28,12 +28,15 @@
 <!--< top>-->
 <nav class="navbar navbar-dark bg-dark">
 <span class="navbar-text text-white">
-        <strong> <span id="authorizeUserLastName"></span> </strong>
-        <strong> <span id="authorizeUserEmail"></span> </strong>
+         <strong> <span th:text="${#authentication.principal.lastName}"></span> </strong>
+
+       <strong> <span th:text="${#authentication.principal.email}"></span> </strong>
      with roles:
-        <span id="authorizeUserRole"></span>
+
+              <span th:text="${#authentication.principal.roles}"></span>
+
    </span>
-    <a class="nav-link text-muted" th:href="@{/logout}">Logout </a>
+    <a class = "nav-link text-muted" th:href="@{/logout}">Logout </a>
 </nav>
 
 <div class="container-fluid bg-light min-vh-100">
