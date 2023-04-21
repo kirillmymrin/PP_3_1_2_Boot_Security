@@ -7,7 +7,7 @@ const userFetchService = {
         'Content-Type': 'application/json; charset=utf-8'
     },
 
-    findAllUsers: async () => await fetch('api/users'),
+    findAllUsers: async () => await fetch('api/admin/users'),
     addNewUser: async (user, addRoles) => await fetch(`api/admin/users/?selectedRoles=` + addRoles,
         {method: 'POST', headers: userFetchService.head, body: JSON.stringify(user)}),
     updateUser: async (user, editRoles) => await fetch(`api/admin/users/?selectedRoles=` + editRoles,

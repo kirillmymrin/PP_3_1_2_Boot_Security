@@ -7,7 +7,7 @@ const userFetchService = {
         'Content-Type': 'application/json; charset=utf-8'
     },
 
-    findAllUsers: async () => await fetch('api/users')
+    findAllUsers: async () => await fetch('api/admin/users')
 }
 async function getTableWithUsers() {
     let table = $('#data tbody');
